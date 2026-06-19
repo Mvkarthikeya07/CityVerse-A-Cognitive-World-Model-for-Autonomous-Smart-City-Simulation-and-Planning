@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}CityMind AI - Camera Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .camera-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-6);
+    }
+    
+    @media (max-width: 992px) {
+        .camera-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .camera-select-width {
+        width: auto !important;
+        min-width: 240px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center flex-wrap gap-4 mb-5">
+    <div>
+        <h2 class="mb-0 text-white"><i class="fas fa-video me-2 text-accent"></i>Live Traffic Video Intelligence</h2>
+        <p class="text-muted mt-2">Real-time edge-device YOLOv8 detection & RSSM feature extraction.</p>
+    </div>
+    <div class="flex gap-2 items-center flex-wrap">
+        <select class="form-select camera-select-width" id="camera-select">
+            <option value="1">Highway Cam 01 (North)</option>
+            <option value="2">Intersection Cam 04 (Downtown)</option>
+            <option value="3">Bridge Cam 02 (East)</option>
+        </select>
+        <label for="video-upload" class="btn btn--primary mb-0 flex items-center" style="cursor: pointer;">
+            <i class="fas fa-upload me-2"></i> Upload Video
+        </label>
+        <input type="file" id="video-upload" accept="video/mp4" style="display: none;">
+        <button class="btn btn--danger flex items-center" id="end-camera-btn">
+            <i class="fas fa-stop me-2"></i> End Feed
+        </button>
+    </div>
+</div>
+
+<div class="camera-layout">
+    <!-- Camera Feed -->
+    <div class="card" style="position: relative; min-height: 500px; height: 100%; overflow: hidden;">
+        <!-- Simulated Video Canvas -->
+        <canvas id="yolo-canvas" style="width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; background: #000;"></canvas>
+        
+        <div style="position: absolute; top: 1.25rem; left: 1.25rem; z-index: 3; display: flex; gap: 0.5rem; align-items: center;">
+            <span class="badge badge--danger"><i class="fas fa-circle me-2" style="font-size: 8px; vertical-align: middle;"></i>LIVE REC</span>
+            <span class="badge badge--neutral" id="frame-id">FRAME: 000</span>
+        </div>
+    </div>
+
+    <!-- Live Telemetry -->
+    <div class="flex flex-col gap-5">
+        <div class="card">
+            <div class="card__header">
+                <h3 class="card__title">YOLO Detections</h3>
+            </div>
+            <div class="card__body">
+                <div class="grid grid--2 text-center">
+                    <div style="padding: var(--space-3) 0;">
+                        <div class="font-bold text-primary-color" style="font-size: var(--text-3xl);" id="val-cars">--</div>
+                        <div class="text-muted" style="font-size: var(--text-sm);">Cars</div>
+                    </div>
+                    <div style="padding: var(--space-3) 0;">
+                        <div class="font-bold text-primary-color" style="font-size: var(--text-3xl);" id="val-trucks">--</div>
+                        <div class="text-muted" style="font-size: var(--text-sm);">Trucks</div>
+                    </div>
+                    <div style="padding: var(--space-3) 0;">
+                        <div class="font-bold text-primary-color" style="font-size: var(--text-3xl);" id="val-bikes">--</div>
+                        <div class="text-muted" style="font-size: var(--text-sm);">Bikes</div>
+                    </div>
+                    <div style="padding: var(--space-3) 0;">
+                        <div class="font-bold text-primary-color" style="font-size: var(--text-3xl);" id="val-buses">--</div>
+                        <div class="text-muted" style="font-size: var(--text-sm);">Buses</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card__header">
+                <h3 class="card__title">Extracted Features</h3>
+            </div>
+            <div class="card__body flex flex-col gap-3">
+                <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-2);">
+                    <span>Total Vehicles</span>
+                    <span class="text-success font-bold" style="font-size: var(--text-lg);" id="val-total">--</span>
+                </div>
+                <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-2);">
+                    <span>Average Speed</span>
+                    <span class="text-warning font-bold" style="font-size: var(--text-lg);" id="val-speed">-- km/h</span>
+                </div>
+                <div class="flex justify-between items-center" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-2);">
+                    <span>Physical Density</span>
+                    <span class="text-primary-color font-bold" style="font-size: var(--text-lg);" id="val-density">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Traffic Score</span>
+                    <span class="text-danger font-bold" style="font-size: var(--text-lg);" id="val-score">-- %</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulate Video Feed on Canvas
+    const canvas = document.getElementById('yolo-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Camera Selection & Video Upload Logic
+    const cameraSelect = document.getElementById('camera-select');
+    const videoUpload = document.getElementById('video-upload');
+    const endCameraBtn = document.getElementById('end-camera-btn');
+    const container = document.querySelector('#yolo-canvas').parentElement;
+    let isLiveStream = false;
+
+    // Handle Dropdown Camera Selection
+    cameraSelect.addEventListener('change', async (e) => {
+        const cameraId = e.target.value;
+        if (!cameraId) return;
+        
+        document.getElementById('frame-id').innerText = "CONNECTING...";
+        document.getElementById('frame-id').className = "badge bg-warning border border-secondary ms-2";
+        
+        try {
+            const res = await fetch('/api/start_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ camera_id: cameraId })
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                isLiveStream = true;
+                document.getElementById('frame-id').innerText = "LIVE STREAM FEED";
+                document.getElementById('frame-id').className = "badge bg-danger border border-secondary ms-2";
+                
+                // Replace canvas with img stream
+                const canvas = document.getElementById('yolo-canvas');
+                if (canvas) canvas.remove();
+                
+                let img = document.getElementById('yolo-stream-img');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.id = 'yolo-stream-img';
+                    img.style = 'width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; object-fit: cover;';
+                    container.appendChild(img);
+                }
+                img.src = '/api/video_stream?t=' + new Date().getTime();
+            } else {
+                alert("Failed to start camera: " + data.message);
+                document.getElementById('frame-id').innerText = "OFFLINE";
+                document.getElementById('frame-id').className = "badge bg-secondary border border-secondary ms-2";
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error connecting to camera");
+            document.getElementById('frame-id').innerText = "ERROR";
+            document.getElementById('frame-id').className = "badge bg-danger border border-secondary ms-2";
+        }
+    });
+
+    // Handle Custom Video Upload
+    videoUpload.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        document.getElementById('frame-id').innerText = "UPLOADING...";
+        document.getElementById('frame-id').className = "badge bg-warning border border-secondary ms-2";
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const res = await fetch('/api/upload_video', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                isLiveStream = true;
+                
+                // Keep the default options, but append custom upload option if not already present
+                let customOpt = cameraSelect.querySelector('option[value="custom"]');
+                if (!customOpt) {
+                    customOpt = document.createElement('option');
+                    customOpt.value = "custom";
+                    customOpt.innerText = "YOLOv8s Custom Upload";
+                    cameraSelect.appendChild(customOpt);
+                }
+                cameraSelect.value = "custom";
+                
+                document.getElementById('frame-id').innerText = "YOLO LIVE INFERENCE";
+                document.getElementById('frame-id').className = "badge bg-primary border border-secondary ms-2";
+                
+                const canvas = document.getElementById('yolo-canvas');
+                if (canvas) canvas.remove();
+                
+                let img = document.getElementById('yolo-stream-img');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.id = 'yolo-stream-img';
+                    img.style = 'width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; object-fit: cover;';
+                    container.appendChild(img);
+                }
+                img.src = '/api/video_stream?t=' + new Date().getTime();
+            } else {
+                alert("Upload failed: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error uploading video");
+        }
+    });
+
+    // Handle End Camera Feed
+    endCameraBtn.addEventListener('click', async () => {
+        try {
+            const res = await fetch('/api/stop_camera', { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                isLiveStream = false;
+                
+                // Revert selection choice to Cam 1
+                cameraSelect.value = "1";
+                // Remove custom option if present
+                const customOpt = cameraSelect.querySelector('option[value="custom"]');
+                if (customOpt) customOpt.remove();
+                
+                // Show offline status badge
+                document.getElementById('frame-id').innerText = "OFFLINE";
+                document.getElementById('frame-id').className = "badge bg-secondary border border-secondary ms-2";
+                
+                // Remove img stream and put back the black canvas
+                const img = document.getElementById('yolo-stream-img');
+                if (img) img.remove();
+                
+                let canvas = document.getElementById('yolo-canvas');
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = 'yolo-canvas';
+                    canvas.style = 'width: 100%; height: 100%; position: absolute; top:0; left:0; z-index: 1; background: #000;';
+                    container.appendChild(canvas);
+                    
+                    // Reinitialize canvas dimensions
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
+                // Reset telemetry metrics visually
+                document.getElementById('val-cars').innerText = "--";
+                document.getElementById('val-trucks').innerText = "--";
+                document.getElementById('val-bikes').innerText = "--";
+                document.getElementById('val-buses').innerText = "--";
+                document.getElementById('val-total').innerText = "--";
+                document.getElementById('val-speed').innerText = "-- km/h";
+                document.getElementById('val-density').innerText = "--";
+                document.getElementById('val-score').innerText = "-- %";
+            } else {
+                alert("Failed to stop camera: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error stopping camera feed");
+        }
+    });
+
+    // Fetch API Data for Telemetry
+    setInterval(() => {
+        if (!isLiveStream) return;
+
+        fetch('/api/live_telemetry')
+            .then(r => r.json())
+            .then(res => {
+                if(res.status === 'error') return;
+                
+                const d = res.data;
+                document.getElementById('val-cars').innerText = d.cars;
+                document.getElementById('val-trucks').innerText = d.trucks;
+                document.getElementById('val-bikes').innerText = d.bikes;
+                document.getElementById('val-buses').innerText = d.buses;
+
+                document.getElementById('val-total').innerText = d.total;
+                document.getElementById('val-speed').innerText = Math.round(d.speed) + " km/h";
+                document.getElementById('val-density').innerText = d.density.toFixed(2);
+                document.getElementById('val-score').innerText = d.traffic_score + "%";
+            })
+            .catch(e => console.error("Telemetry error", e));
+    }, 500);
+
+    // Auto-start default camera on page load
+    setTimeout(() => {
+        cameraSelect.dispatchEvent(new Event('change'));
+    }, 500);
+</script>
+{% endblock %}

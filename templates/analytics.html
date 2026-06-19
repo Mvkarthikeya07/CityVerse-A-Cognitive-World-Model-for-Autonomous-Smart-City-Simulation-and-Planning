@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Analytics Grid -->
+<div class="grid grid--2" style="gap: var(--space-5);">
+    <!-- Row 1 -->
+    <div class="chart-panel fade-in fade-in-delay-1">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🚗 Traffic Volume by Zone</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-traffic-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel fade-in fade-in-delay-2">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🛑 Congestion Distribution</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 240px; display: flex; justify-content: center; align-items: center;">
+            <canvas id="analytics-congestion-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="chart-panel fade-in fade-in-delay-3">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">💨 AQI Trends — 7 Day</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-aqi-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel fade-in fade-in-delay-4">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">⚡ Energy Demand vs Generation</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-energy-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="chart-panel fade-in fade-in-delay-1">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">💧 Water Consumption (7-Day)</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-water-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel fade-in fade-in-delay-2">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🗑️ Waste Management Distribution</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 240px; display: flex; justify-content: center; align-items: center;">
+            <canvas id="analytics-waste-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="chart-panel fade-in fade-in-delay-3">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🏥 ER Response Time Trends (Min)</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-healthcare-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel fade-in fade-in-delay-4">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🛡️ Public Safety Incidents (7-Day)</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-safety-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+    
+    <!-- Row 5 (Full Width) -->
+    <div class="chart-panel fade-in fade-in-delay-1" style="grid-column: 1 / -1;">
+        <div class="chart-panel__header">
+            <h3 class="chart-panel__title">🌿 CO₂ Levels (ppm) — 7 Day Trend</h3>
+        </div>
+        <div class="chart-panel__body" style="height: 220px;">
+            <canvas id="analytics-environment-chart" class="chart-panel__canvas"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

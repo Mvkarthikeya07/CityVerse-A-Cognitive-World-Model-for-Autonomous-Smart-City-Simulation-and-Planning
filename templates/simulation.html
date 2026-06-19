@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Simulation Engine{% endblock %}
+{% block page_title %}Simulation Engine{% endblock %}
+
+{% block content %}
+<div class="grid grid--2" style="gap: var(--space-6);">
+    <!-- Scenario Simulator Controls -->
+    <div class="card fade-in">
+        <div class="card__header">
+            <h3 class="card__title">Scenario Simulator</h3>
+        </div>
+        <div class="card__body" style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Trigger specific events or test policies:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <button class="btn btn--outline" onclick="triggerScenario('Close Road')">⛔ Close Road</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Add Bus Route')">🚌 Add Bus Route</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Increase Metro')">🚇 Increase Metro</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Emergency Event')">🚨 Emergency Event</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Heavy Rain')">🌧️ Heavy Rain</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Water Leak')">💧 Water Leak</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Waste Backlog')">🗑️ Waste Backlog</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Viral Outbreak')">🏥 Viral Outbreak</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Safety Threat')">🛡️ Safety Threat</button>
+                <button class="btn btn--outline" onclick="triggerScenario('Heatwave')">🌿 Heatwave</button>
+            </div>
+            
+            <div style="margin-top: var(--space-4);">
+                <label class="form-label">Objective</label>
+                <select class="form-select" id="sim-objective" style="max-width: 300px;">
+                    <option value="minimize_congestion">Minimise Congestion</option>
+                    <option value="minimize_pollution">Minimise Pollution</option>
+                    <option value="minimize_water_loss">Minimise Water Loss</option>
+                    <option value="maximize_waste_recycling">Maximise Waste Recycling</option>
+                    <option value="optimize_healthcare">Optimise Healthcare</option>
+                    <option value="maximize_public_safety">Maximise Public Safety</option>
+                    <option value="minimize_environmental_impact">Minimise Environmental Impact</option>
+                    <option value="balanced" selected>Balanced Approach</option>
+                </select>
+            </div>
+            
+            <button class="btn btn--primary" style="margin-top: 10px; align-self: flex-start;" onclick="runSimulation()">▶ Run Simulation Pipeline</button>
+        </div>
+    </div>
+
+    <!-- Action Comparison (Side-by-side) -->
+    <div class="card fade-in fade-in-delay-1">
+        <div class="card__header">
+            <h3 class="card__title">Action Comparison</h3>
+        </div>
+        <div class="card__body" id="action-comparison-container" style="display:flex; flex-direction:column; gap:var(--space-4); min-height: 250px;">
+            <p style="color: var(--text-secondary); text-align: center; margin-top: 50px;">Select a scenario and run a simulation to compare futures.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Timeline -->
+<div class="card fade-in fade-in-delay-2" style="margin-top: var(--space-6);">
+    <div class="card__header"><h3 class="card__title">Simulation Timeline</h3></div>
+    <div class="card__body">
+        <div class="sim-timeline" style="display:flex; align-items:center;">
+            <span style="font-size:0.8rem; color:var(--text-secondary);">0:00</span>
+            <div class="sim-timeline__progress" style="flex:1; margin:0 15px; height:8px; background:var(--gray-800); border-radius:4px; overflow:hidden;">
+                <div class="sim-timeline__bar" id="sim-progress-bar" style="width: 0%; height:100%; background:var(--primary); transition: width 0.1s linear;"></div>
+            </div>
+            <span style="font-size:0.8rem; color:var(--text-secondary);">24:00</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/simulation.js') }}"></script>
+{% endblock %}

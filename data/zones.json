@@ -1,0 +1,122 @@
+[
+  {
+    "id": "Zone_A",
+    "name": "Greenfield Heights",
+    "type": "residential",
+    "center": {
+      "lat": 40.718,
+      "lng": -74.002
+    },
+    "bounds": [
+      [
+        40.721,
+        -74.006
+      ],
+      [
+        40.721,
+        -73.998
+      ],
+      [
+        40.715,
+        -73.998
+      ],
+      [
+        40.715,
+        -74.006
+      ]
+    ],
+    "color": "#4CAF50",
+    "population": 45200,
+    "area_sqkm": 3.8,
+    "sensors": {
+      "traffic": 12,
+      "pollution": 8,
+      "energy": 6,
+      "water": 8,
+      "waste": 6,
+      "healthcare": 4,
+      "safety": 8,
+      "environment": 10
+    }
+  },
+  {
+    "id": "Zone_B",
+    "name": "Metro Central",
+    "type": "commercial",
+    "center": {
+      "lat": 40.7128,
+      "lng": -74.006
+    },
+    "bounds": [
+      [
+        40.7158,
+        -74.01
+      ],
+      [
+        40.7158,
+        -74.002
+      ],
+      [
+        40.7098,
+        -74.002
+      ],
+      [
+        40.7098,
+        -74.01
+      ]
+    ],
+    "color": "#2196F3",
+    "population": 28500,
+    "area_sqkm": 2.4,
+    "sensors": {
+      "traffic": 18,
+      "pollution": 10,
+      "energy": 9,
+      "water": 10,
+      "waste": 8,
+      "healthcare": 6,
+      "safety": 12,
+      "environment": 12
+    }
+  },
+  {
+    "id": "Zone_C",
+    "name": "Ironworks District",
+    "type": "industrial",
+    "center": {
+      "lat": 40.705,
+      "lng": -74.011
+    },
+    "bounds": [
+      [
+        40.7085,
+        -74.016
+      ],
+      [
+        40.7085,
+        -74.006
+      ],
+      [
+        40.7015,
+        -74.006
+      ],
+      [
+        40.7015,
+        -74.016
+      ]
+    ],
+    "color": "#FF9800",
+    "population": 12800,
+    "area_sqkm": 4.2,
+    "sensors": {
+      "traffic": 10,
+      "pollution": 12,
+      "energy": 8,
+      "water": 6,
+      "waste": 10,
+      "healthcare": 4,
+      "safety": 10,
+      "environment": 8
+    }
+  }
+]

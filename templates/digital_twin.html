@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Digital Twin{% endblock %}
+{% block page_title %}Digital Twin{% endblock %}
+
+{% block content %}
+<div class="grid grid--2" style="gap: var(--space-6); min-height: 600px;">
+    <!-- 3D WebGL Viewport -->
+    <div class="card" style="display: flex; flex-direction: column;">
+        <div class="card__header">
+            <h3 class="card__title">3D World Model Rendering</h3>
+        </div>
+        <div id="digital-twin-viewport" style="flex: 1; min-height: 500px; background: var(--gray-900); border-radius: var(--radius-md); overflow: hidden;">
+        </div>
+    </div>
+
+    <!-- 2D Live City Map (Google Maps Digital Twin) -->
+    <div class="card" style="display: flex; flex-direction: column; position: relative;">
+        <div class="card__header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card__title">City Digital Twin Map</h3>
+            <!-- Search City Bar -->
+            <div style="position: relative; width: 250px;">
+                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
+                <input id="city-search-input" type="text" placeholder="Search City (e.g. Mumbai)" style="width: 100%; padding: 8px 10px 8px 35px; background: var(--gray-900); border: 1px solid var(--gray-700); border-radius: var(--radius-sm); color: var(--text-primary); outline: none; font-family: var(--font-base);">
+            </div>
+        </div>
+        
+        <!-- Map Container -->
+        <div id="google-city-map" style="flex: 1; min-height: 500px; border-radius: var(--radius-md); overflow: hidden; background: #0a0e1a; position: relative;">
+        </div>
+
+        <!-- Legend -->
+        <div class="card__footer" style="display: flex; justify-content: center; gap: var(--space-4); background: rgba(0,0,0,0.2); padding: 10px; flex-wrap: wrap;">
+            <div style="color: var(--text-secondary); font-size: 0.85rem; margin-right: 15px;"><strong>Traffic:</strong> Google Live</div>
+            <div style="display:flex; align-items:center; gap: 5px; font-size: 0.85rem;"><span style="width:12px; height:12px; background:rgba(0, 255, 0, 0.7); border-radius:50%;"></span> AQI 0-50</div>
+            <div style="display:flex; align-items:center; gap: 5px; font-size: 0.85rem;"><span style="width:12px; height:12px; background:rgba(255, 255, 0, 0.7); border-radius:50%;"></span> AQI 50-100</div>
+            <div style="display:flex; align-items:center; gap: 5px; font-size: 0.85rem;"><span style="width:12px; height:12px; background:rgba(255, 165, 0, 0.7); border-radius:50%;"></span> AQI 100-150</div>
+            <div style="display:flex; align-items:center; gap: 5px; font-size: 0.85rem;"><span style="width:12px; height:12px; background:rgba(255, 0, 0, 0.7); border-radius:50%;"></span> AQI 150+</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Three.js Core & Addons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+<!-- Leaflet Heatmap Plugin -->
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script src="{{ url_for('static', filename='js/charts.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/digital-twin.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/google-map.js') }}?v=2"></script>
+{% endblock %}

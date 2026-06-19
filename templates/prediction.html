@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Prediction & Forecasting{% endblock %}
+{% block page_title %}Prediction & Forecasting{% endblock %}
+
+{% block content %}
+<!-- Controls -->
+            <div class="grid grid--3" style="margin-bottom: var(--space-6);">
+                <div class="card fade-in fade-in-delay-1">
+                    <div class="card__title" style="margin-bottom: var(--space-3);">Forecast Metric</div>
+                    <select id="forecast-metric" class="sim-param__input" onchange="setMetric(this.value)" style="width:100%; padding: var(--space-3); background: var(--gray-900); border: 1px solid var(--gray-700); border-radius: var(--radius-sm); color: var(--text-primary);">
+                        <option value="traffic">Traffic Flow</option>
+                        <option value="pollution">Air Quality</option>
+                        <option value="energy">Energy Demand</option>
+                        <option value="water">Water Consumption</option>
+                        <option value="waste">Waste Management</option>
+                        <option value="healthcare">Healthcare Response</option>
+                        <option value="safety">Public Safety</option>
+                        <option value="environment">Environment (CO2)</option>
+                    </select>
+                </div>
+                <div class="card fade-in fade-in-delay-2">
+                    <div class="card__title" style="margin-bottom: var(--space-3);">Forecast Horizon</div>
+                    <input type="range" min="1" max="168" value="24" style="width:100%;" oninput="setHorizon(parseInt(this.value)); document.getElementById('horizon-label').textContent = this.value + ' hours ahead';">
+                    <div id="horizon-label" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: var(--space-2);">24 hours ahead</div>
+                </div>
+                <div class="card fade-in fade-in-delay-3" style="display:flex; align-items:flex-end;">
+                    <button class="btn btn--primary" style="width:100%;" onclick="runPrediction()">🔮 Run Forecast</button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="prediction-results">
+                <div class="card fade-in" style="min-height: 300px; display:flex; align-items:center; justify-content:center; color: var(--text-secondary);">
+                    <p>Select a metric and click "Run Forecast" to generate predictions.</p>
+                </div>
+            </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+{% endblock %}

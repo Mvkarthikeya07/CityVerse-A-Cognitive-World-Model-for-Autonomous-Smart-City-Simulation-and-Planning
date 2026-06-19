@@ -1,0 +1,227 @@
+[
+  {
+    "id": "baseline",
+    "name": "Normal Day Operations",
+    "description": "Standard weekday traffic, energy, and environmental patterns with no extraordinary events.",
+    "icon": "fa-city",
+    "parameters": {
+      "traffic_multiplier": 1.0,
+      "pollution_multiplier": 1.0,
+      "energy_multiplier": 1.0,
+      "water_multiplier": 1.0,
+      "waste_multiplier": 1.0,
+      "incident_probability": 0.03,
+      "duration_hours": 24
+    },
+    "expected_outcomes": {
+      "avg_congestion": "medium",
+      "avg_aqi": 85,
+      "peak_energy_kwh": 780,
+      "estimated_incidents": 2
+    }
+  },
+  {
+    "id": "peak_hour",
+    "name": "Rush Hour Stress Test",
+    "description": "Simulates extreme rush-hour conditions with 40% more vehicles and reduced average speeds across all zones.",
+    "icon": "fa-car-burst",
+    "parameters": {
+      "traffic_multiplier": 1.4,
+      "pollution_multiplier": 1.25,
+      "energy_multiplier": 1.1,
+      "water_multiplier": 1.05,
+      "waste_multiplier": 1.05,
+      "incident_probability": 0.08,
+      "duration_hours": 6
+    },
+    "expected_outcomes": {
+      "avg_congestion": "high",
+      "avg_aqi": 120,
+      "peak_energy_kwh": 850,
+      "estimated_incidents": 5
+    }
+  },
+  {
+    "id": "city_event",
+    "name": "Major City Event",
+    "description": "Large-scale public event (concert/sports game) drawing 50,000+ attendees to Metro Central, causing localized congestion spikes.",
+    "icon": "fa-calendar-star",
+    "parameters": {
+      "traffic_multiplier": 1.6,
+      "pollution_multiplier": 1.3,
+      "energy_multiplier": 1.35,
+      "water_multiplier": 1.3,
+      "waste_multiplier": 1.4,
+      "incident_probability": 0.06,
+      "event_zone": "Zone_B",
+      "attendees": 52000,
+      "duration_hours": 8
+    },
+    "expected_outcomes": {
+      "avg_congestion": "high",
+      "avg_aqi": 110,
+      "peak_energy_kwh": 950,
+      "estimated_incidents": 4
+    }
+  },
+  {
+    "id": "emergency",
+    "name": "Emergency Response",
+    "description": "Major traffic accident on arterial road in Ironworks District requiring lane closures and emergency vehicle routing.",
+    "icon": "fa-triangle-exclamation",
+    "parameters": {
+      "traffic_multiplier": 1.3,
+      "pollution_multiplier": 1.15,
+      "energy_multiplier": 1.05,
+      "water_multiplier": 1.0,
+      "waste_multiplier": 1.0,
+      "incident_probability": 0.15,
+      "blocked_roads": [
+        "RC-301",
+        "RC-302"
+      ],
+      "emergency_zone": "Zone_C",
+      "duration_hours": 4
+    },
+    "expected_outcomes": {
+      "avg_congestion": "critical",
+      "avg_aqi": 135,
+      "peak_energy_kwh": 800,
+      "estimated_incidents": 8
+    }
+  },
+  {
+    "id": "green_initiative",
+    "name": "Green Initiative Policy",
+    "description": "Test reduced-emission policies: 20% EV adoption increase, speed limit reductions, expanded public transit, and solar incentives.",
+    "icon": "fa-leaf",
+    "parameters": {
+      "traffic_multiplier": 0.85,
+      "pollution_multiplier": 0.65,
+      "energy_multiplier": 0.9,
+      "water_multiplier": 0.95,
+      "waste_multiplier": 0.95,
+      "incident_probability": 0.02,
+      "ev_adoption_pct": 0.35,
+      "public_transit_boost": 1.25,
+      "solar_capacity_boost": 1.4,
+      "duration_hours": 24
+    },
+    "expected_outcomes": {
+      "avg_congestion": "low",
+      "avg_aqi": 55,
+      "peak_energy_kwh": 680,
+      "estimated_incidents": 1
+    }
+  },
+  {
+    "id": "water_leak",
+    "name": "Water Main Leak",
+    "description": "Critical water main burst detected in Residential Greenfield Heights. Grid pressure drops, endangering municipal reserves.",
+    "icon": "fa-faucet-drip",
+    "parameters": {
+      "traffic_multiplier": 1.05,
+      "pollution_multiplier": 1.0,
+      "energy_multiplier": 1.0,
+      "water_multiplier": 1.5,
+      "waste_multiplier": 1.0,
+      "incident_probability": 0.05,
+      "leak_zone": "Zone_A",
+      "duration_hours": 12
+    },
+    "expected_outcomes": {
+      "avg_congestion": "medium",
+      "avg_aqi": 75,
+      "peak_energy_kwh": 700,
+      "estimated_incidents": 3
+    }
+  },
+  {
+    "id": "waste_backlog",
+    "name": "Waste Collection Backlog",
+    "description": "Industrial action by sanitation operators creates trash overflows at multiple commercial collection sites in Metro Central.",
+    "icon": "fa-trash-can",
+    "parameters": {
+      "traffic_multiplier": 1.1,
+      "pollution_multiplier": 1.15,
+      "energy_multiplier": 1.0,
+      "water_multiplier": 1.0,
+      "waste_multiplier": 1.6,
+      "incident_probability": 0.04,
+      "backlog_zone": "Zone_B",
+      "duration_hours": 48
+    },
+    "expected_outcomes": {
+      "avg_congestion": "medium",
+      "avg_aqi": 95,
+      "peak_energy_kwh": 710,
+      "estimated_incidents": 2
+    }
+  },
+  {
+    "id": "viral_outbreak",
+    "name": "Viral Outbreak / Pandemic",
+    "description": "Sudden seasonal outbreak triggers major spikes in local clinic intakes and forces hospital bed allocations to capacity thresholds.",
+    "icon": "fa-virus",
+    "parameters": {
+      "traffic_multiplier": 0.9,
+      "pollution_multiplier": 0.95,
+      "energy_multiplier": 1.05,
+      "water_multiplier": 1.1,
+      "waste_multiplier": 1.15,
+      "incident_probability": 0.08,
+      "outbreak_zone": "Zone_A",
+      "duration_hours": 72
+    },
+    "expected_outcomes": {
+      "avg_congestion": "low",
+      "avg_aqi": 80,
+      "peak_energy_kwh": 750,
+      "estimated_incidents": 5
+    }
+  },
+  {
+    "id": "safety_threat",
+    "name": "Public Safety Alert",
+    "description": "Large-scale public gathering in Downtown Metro Central requires high surveillance routing and dynamic patrol re-allocations.",
+    "icon": "fa-shield-halved",
+    "parameters": {
+      "traffic_multiplier": 1.25,
+      "pollution_multiplier": 1.1,
+      "energy_multiplier": 1.1,
+      "water_multiplier": 1.0,
+      "waste_multiplier": 1.2,
+      "incident_probability": 0.12,
+      "safety_zone": "Zone_B",
+      "duration_hours": 6
+    },
+    "expected_outcomes": {
+      "avg_congestion": "high",
+      "avg_aqi": 90,
+      "peak_energy_kwh": 820,
+      "estimated_incidents": 6
+    }
+  },
+  {
+    "id": "heatwave",
+    "name": "Extreme Climate Heatwave",
+    "description": "Extreme high ambient temperatures trigger severe grid load challenges, peak cooling demand, and critical environment warnings.",
+    "icon": "fa-temperature-arrow-up",
+    "parameters": {
+      "traffic_multiplier": 0.95,
+      "pollution_multiplier": 1.4,
+      "energy_multiplier": 1.45,
+      "water_multiplier": 1.35,
+      "waste_multiplier": 1.1,
+      "incident_probability": 0.07,
+      "heatwave_zone": "Zone_C",
+      "duration_hours": 24
+    },
+    "expected_outcomes": {
+      "avg_congestion": "medium",
+      "avg_aqi": 145,
+      "peak_energy_kwh": 1150,
+      "estimated_incidents": 3
+    }
+  }
+]

@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap: var(--space-6); max-width: 640px;">
+    <!-- Model Settings -->
+    <div class="card fade-in fade-in-delay-1">
+        <div class="card__header">
+            <h3 class="card__title">World Model Configuration</h3>
+        </div>
+        <div class="card__body" style="display:flex; flex-direction:column; gap: var(--space-4);">
+            <div>
+                <label class="form-label" for="setting-latent">Latent Dimension</label>
+                <input type="number" class="form-input" id="setting-latent" value="64" style="max-width: 320px; font-family:var(--font-mono);">
+            </div>
+            <div>
+                <label class="form-label" for="setting-action">Action Dimension</label>
+                <input type="number" class="form-input" id="setting-action" value="16" style="max-width: 320px; font-family:var(--font-mono);">
+            </div>
+            <div>
+                <label class="form-label" for="setting-horizon">Planning Horizon</label>
+                <input type="number" class="form-input" id="setting-horizon" value="10" style="max-width: 320px; font-family:var(--font-mono);">
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Sources -->
+    <div class="card fade-in fade-in-delay-2">
+        <div class="card__header">
+            <h3 class="card__title">Data Sources</h3>
+        </div>
+        <div class="card__body" style="display:flex; flex-direction:column; gap: var(--space-3);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--text-secondary);">Traffic Sensors</span>
+                <span class="badge badge--success">Connected</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--text-secondary);">Pollution Monitors</span>
+                <span class="badge badge--success">Connected</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--text-secondary);">Energy Grid API</span>
+                <span class="badge badge--warning">Degraded</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences -->
+    <div class="card fade-in fade-in-delay-3">
+        <div class="card__header">
+            <h3 class="card__title">Preferences</h3>
+        </div>
+        <div class="card__body" style="display:flex; flex-direction:column; gap: var(--space-4);">
+            <div>
+                <label class="form-label" for="setting-refresh">Dashboard Refresh Rate</label>
+                <select class="form-select" id="setting-refresh" style="max-width: 320px;">
+                    <option value="10">10 seconds</option>
+                    <option value="30" selected>30 seconds</option>
+                    <option value="60">1 minute</option>
+                    <option value="300">5 minutes</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn--primary" id="save-settings-btn" style="align-self:flex-start;">💾 Save Settings</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toast Notification helper
+    function showToast(message, type = 'success') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <span class="toast__icon">${type === 'success' ? '✅' : 'ℹ️'}</span>
+            <span class="toast__message">${message}</span>
+            <button class="toast__close" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('toast--out');
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    }
+
+    // Load Settings
+    async function loadSettings() {
+        // 1. Load preference from localStorage
+        const savedRefresh = localStorage.getItem('setting-refresh') || '30';
+        document.getElementById('setting-refresh').value = savedRefresh;
+
+        // 2. Load World Model settings from backend
+        try {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('setting-latent').value = data.latent_dim;
+                document.getElementById('setting-action').value = data.action_dim;
+                document.getElementById('setting-horizon').value = data.planning_horizon;
+            }
+        } catch (err) {
+            console.error("Failed to load settings from backend:", err);
+            // Fallback to localStorage
+            document.getElementById('setting-latent').value = localStorage.getItem('setting-latent') || '64';
+            document.getElementById('setting-action').value = localStorage.getItem('setting-action') || '16';
+            document.getElementById('setting-horizon').value = localStorage.getItem('setting-horizon') || '10';
+        }
+    }
+
+    // Save Settings
+    async function saveSettings() {
+        const btn = document.getElementById('save-settings-btn');
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+
+        const latentVal = document.getElementById('setting-latent').value;
+        const actionVal = document.getElementById('setting-action').value;
+        const horizonVal = document.getElementById('setting-horizon').value;
+        const refreshVal = document.getElementById('setting-refresh').value;
+
+        // 1. Save to local storage
+        localStorage.setItem('setting-latent', latentVal);
+        localStorage.setItem('setting-action', actionVal);
+        localStorage.setItem('setting-horizon', horizonVal);
+        localStorage.setItem('setting-refresh', refreshVal);
+
+        // 2. Save to backend API
+        try {
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    latent_dim: parseInt(latentVal),
+                    action_dim: parseInt(actionVal),
+                    planning_horizon: parseInt(horizonVal)
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                showToast(data.message || "Settings saved and implemented successfully!", "success");
+            } else {
+                const errData = await res.json();
+                showToast("Backend error: " + errData.message, "danger");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Saved preference locally, but failed to connect to backend engine.", "warning");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '💾 Save Settings';
+        }
+    }
+
+    document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+    document.addEventListener('DOMContentLoaded', loadSettings);
+</script>
+{% endblock %}
+
+

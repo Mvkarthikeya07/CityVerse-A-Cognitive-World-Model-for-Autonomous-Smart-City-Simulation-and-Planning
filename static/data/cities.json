@@ -1,0 +1,74 @@
+[
+    {
+        "name": "Mumbai, India",
+        "lat": 19.0760,
+        "lng": 72.8777,
+        "traffic": 14250,
+        "aqi": 112,
+        "energy": 450.2,
+        "alerts": 8
+    },
+    {
+        "name": "New York, USA",
+        "lat": 40.7128,
+        "lng": -74.0060,
+        "traffic": 18400,
+        "aqi": 58,
+        "energy": 890.5,
+        "alerts": 12
+    },
+    {
+        "name": "London, UK",
+        "lat": 51.5074,
+        "lng": -0.1278,
+        "traffic": 15100,
+        "aqi": 45,
+        "energy": 620.1,
+        "alerts": 5
+    },
+    {
+        "name": "Tokyo, Japan",
+        "lat": 35.6762,
+        "lng": 139.6503,
+        "traffic": 22100,
+        "aqi": 35,
+        "energy": 1150.8,
+        "alerts": 3
+    },
+    {
+        "name": "Paris, France",
+        "lat": 48.8566,
+        "lng": 2.3522,
+        "traffic": 11800,
+        "aqi": 62,
+        "energy": 410.4,
+        "alerts": 4
+    },
+    {
+        "name": "Dubai, UAE",
+        "lat": 25.2048,
+        "lng": 55.2708,
+        "traffic": 9500,
+        "aqi": 145,
+        "energy": 780.9,
+        "alerts": 6
+    },
+    {
+        "name": "Singapore",
+        "lat": 1.3521,
+        "lng": 103.8198,
+        "traffic": 13400,
+        "aqi": 28,
+        "energy": 510.3,
+        "alerts": 2
+    },
+    {
+        "name": "Sydney, Australia",
+        "lat": -33.8688,
+        "lng": 151.2093,
+        "traffic": 8900,
+        "aqi": 22,
+        "energy": 380.6,
+        "alerts": 1
+    }
+]

@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}AI Recommendations{% endblock %}
+{% block page_title %}AI Recommendations{% endblock %}
+
+{% block content %}
+<div style="display:flex; flex-direction:column; gap: var(--space-6);">
+
+    <!-- AI Imagination Pipeline Visual -->
+    <div class="card fade-in">
+        <div class="card__header">
+            <h3 class="card__title">AI Imagination Pipeline</h3>
+            <span class="badge badge--info" style="background: rgba(13, 142, 239, 0.2); color: #0d8eef;">MCTS Planner Active</span>
+        </div>
+        <div class="card__body" style="display: flex; justify-content: space-between; align-items: center; text-align: center; padding: 30px;">
+            <div style="flex: 1;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🌍</div>
+                <h4 style="margin:0; color: var(--text-primary);">Current State</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Traffic: 84%<br>AQI: 92</p>
+            </div>
+            <div style="font-size: 2rem; color: var(--accent);">→</div>
+            <div style="flex: 1;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🧠</div>
+                <h4 style="margin:0; color: var(--text-primary);">Predicted States</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Simulating 1,000+ futures<br>over 10-step horizons</p>
+            </div>
+            <div style="font-size: 2rem; color: var(--accent);">→</div>
+            <div style="flex: 1;">
+                <div style="font-size: 2rem; margin-bottom: 10px;">💡</div>
+                <h4 style="margin:0; color: var(--text-primary);">Recommended Action</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Optimal policy identified<br>for target objective</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active System Alerts HUD -->
+    <div class="card fade-in" id="active-alerts-hud" style="display: none; border-left: 4px solid var(--danger);">
+        <div class="card__header">
+            <h3 class="card__title" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                <span id="alerts-hud-icon">⚠️</span> Active System Alerts (<span id="alerts-hud-city">Mumbai, India</span>)
+            </h3>
+            <span class="badge badge--danger" id="alerts-count-badge">0 Alerts</span>
+        </div>
+        <div class="card__body" id="active-alerts-list" style="display: flex; flex-direction: column; gap: var(--space-3); padding-top: 10px;">
+            <!-- Dynamic alerts go here -->
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <h2 style="margin: 0;">Recommended Actions</h2>
+        <span id="current-city-badge" class="badge badge--info" style="font-size: 0.95rem; padding: 6px 12px; background: rgba(13, 142, 239, 0.2); color: #0d8eef;">City: Mumbai, India</span>
+    </div>
+
+    <div id="recommendations-list" style="display:flex; flex-direction:column; gap: var(--space-4);">
+        <div style="text-align:center; padding: 40px; color: var(--text-secondary);">
+            Loading AI Recommendations from World Model...
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toast Notification helper
+    function showToast(message, type = 'success') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <span class="toast__icon">${type === 'success' ? '✅' : 'ℹ️'}</span>
+            <span class="toast__message">${message}</span>
+            <button class="toast__close" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(toast);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            toast.classList.add('toast--out');
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    }
+
+    let lastLoadedCity = '';
+
+    // Load dynamic recommendations based on previous data & live camera feed
+    async function loadRecommendations(force = false) {
+        const container = document.getElementById('recommendations-list');
+        const alertsHud = document.getElementById('active-alerts-hud');
+        const alertsList = document.getElementById('active-alerts-list');
+        const alertsCountBadge = document.getElementById('alerts-count-badge');
+        const alertsHudCity = document.getElementById('alerts-hud-city');
+        const alertsHudIcon = document.getElementById('alerts-hud-icon');
+        const cityBadge = document.getElementById('current-city-badge');
+
+        const city = (typeof globalState !== 'undefined' && globalState.city) 
+            ? globalState.city 
+            : (localStorage.getItem('selectedCity') || 'Mumbai, India');
+
+        // Prevent redundant loads unless forced or city changes
+        if (!force && lastLoadedCity === city && container.innerHTML.trim() !== '' && !container.innerHTML.includes('Loading')) {
+            return;
+        }
+        lastLoadedCity = city;
+
+        // Update city display
+        if (cityBadge) cityBadge.textContent = `City: ${city}`;
+        if (alertsHudCity) alertsHudCity.textContent = city;
+
+        try {
+            const res = await fetch(`/api/recommendations?city=${encodeURIComponent(city)}&_=${Date.now()}`);
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                // 1. Update Alerts HUD
+                if (data.alerts && data.alerts.length > 0) {
+                    alertsCountBadge.textContent = `${data.alerts.length} Active Alert${data.alerts.length > 1 ? 's' : ''}`;
+                    
+                    const hasDanger = data.alerts.some(a => a.severity === 'Danger');
+                    if (hasDanger) {
+                        alertsHud.style.borderLeft = '4px solid var(--danger)';
+                        alertsHudIcon.textContent = '🚨';
+                        alertsCountBadge.className = 'badge badge--danger';
+                        alertsCountBadge.style.background = '';
+                        alertsCountBadge.style.color = '';
+                    } else {
+                        alertsHud.style.borderLeft = '4px solid var(--warning)';
+                        alertsHudIcon.textContent = '⚠️';
+                        alertsCountBadge.className = 'badge badge--warning';
+                        alertsCountBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+                        alertsCountBadge.style.color = '#f59e0b';
+                    }
+                    
+                    alertsList.innerHTML = '';
+                    data.alerts.forEach(alert => {
+                        const itemBorder = alert.severity === 'Danger' ? 'var(--danger)' : 'var(--warning)';
+                        const itemBadgeClass = alert.severity === 'Danger' ? 'badge--danger' : 'badge--warning';
+                        const itemBadgeStyle = alert.severity === 'Danger' ? '' : 'background: rgba(245, 158, 11, 0.2); color: #f59e0b;';
+                        const itemIcon = alert.severity === 'Danger' ? '🚨' : '⚠️';
+                        
+                        alertsList.innerHTML += `
+                            <div style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: var(--radius-md); border-left: 4px solid ${itemBorder};">
+                                <span style="font-size: 1.25rem; line-height: 1;">${itemIcon}</span>
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">${alert.title}</h4>
+                                        <span class="badge ${itemBadgeClass}" style="${itemBadgeStyle} font-size: 0.75rem; padding: 2px 8px;">${alert.severity}</span>
+                                    </div>
+                                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">${alert.text}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    alertsCountBadge.textContent = '0 Alerts';
+                    alertsCountBadge.className = 'badge badge--success';
+                    alertsCountBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+                    alertsCountBadge.style.color = '#10b981';
+                    alertsHud.style.borderLeft = '4px solid var(--accent)';
+                    alertsHudIcon.textContent = '✅';
+                    
+                    alertsList.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: var(--radius-md); border-left: 4px solid var(--accent);">
+                            <span style="font-size: 1.25rem; line-height: 1;">✅</span>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">All Systems Nominal</h4>
+                                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">City operations are functioning within standard baseline thresholds.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                alertsHud.style.display = 'block';
+
+                // 2. Render Recommendations
+                if (data.recommendations && data.recommendations.length > 0) {
+                    container.innerHTML = '';
+                    data.recommendations.forEach((rec, idx) => {
+                        const badgeClass = rec.impact === 'Critical' ? 'badge--danger' : (rec.impact === 'High Impact' ? 'badge--success' : (rec.impact === 'Medium Impact' ? 'badge--warning' : 'badge--info'));
+                        const badgeStyle = rec.impact === 'Critical' ? '' : (rec.impact === 'High Impact' ? 'background: rgba(16, 185, 129, 0.2); color: #10b981;' : (rec.impact === 'Medium Impact' ? 'background: rgba(245, 158, 11, 0.2); color: #f59e0b;' : 'background: rgba(13, 142, 239, 0.2); color: #0d8eef;'));
+                        
+                        const borderStyle = idx === 0 ? 'border-left: 4px solid var(--accent);' : '';
+                        
+                        let alternativesHtml = '';
+                        if (rec.alternatives) {
+                            alternativesHtml = `
+                                <div>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Alternatives Tested:</div>
+                                    <span style="color: var(--text-secondary);">${rec.alternatives}</span>
+                                </div>
+                            `;
+                        }
+
+                        // Parse alert-triggered badge dynamically
+                        let triggerBadgeHtml = '';
+                        if (rec.description.includes('Triggered by active')) {
+                            const match = rec.description.match(/Triggered by active ([\w\s]+ Alert|[\w\s]+ Threshold|[\w\s]+ Warning)/);
+                            const alertName = match ? match[1] : 'Active Alert';
+                            
+                            let alertIcon = '⚠️';
+                            let alertColor = 'var(--warning)';
+                            let alertBg = 'rgba(245, 158, 11, 0.15)';
+                            if (alertName.toLowerCase().includes('quality') || alertName.toLowerCase().includes('air') || alertName.toLowerCase().includes('critical') || alertName.toLowerCase().includes('danger')) {
+                                alertIcon = '🚨';
+                                alertColor = 'var(--danger)';
+                                alertBg = 'rgba(239, 68, 68, 0.15)';
+                            }
+                            
+                            triggerBadgeHtml = `<span class="badge" style="background: ${alertBg}; color: ${alertColor}; border: 1px solid ${alertColor}33; display: inline-flex; align-items: center; gap: 4px;">${alertIcon} Triggered by: ${alertName}</span>`;
+                        } else {
+                            triggerBadgeHtml = `<span class="badge badge--info" style="background: rgba(13, 142, 239, 0.15); color: #0d8eef; border: 1px solid rgba(13, 142, 239, 0.2); display: inline-flex; align-items: center; gap: 4px;">⚙️ Baseline Recommendation</span>`;
+                        }
+
+                        const simScenario = rec.scenario || 'Add Bus Route';
+
+                        container.innerHTML += `
+                            <div class="card fade-in" style="${borderStyle} margin-bottom: 20px;">
+                                <div class="card__header" style="flex-wrap: wrap; gap: 10px;">
+                                    <h3 class="card__title">${rec.title}</h3>
+                                    <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                                        ${triggerBadgeHtml}
+                                        <span class="badge badge--success" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">Confidence: ${rec.confidence}%</span>
+                                        <span class="badge ${badgeClass}" style="${badgeStyle}">${rec.impact}</span>
+                                    </div>
+                                </div>
+                                <div class="card__body">
+                                    <p style="color:var(--text-secondary); margin-bottom:var(--space-4);">
+                                        ${rec.description}
+                                    </p>
+                                    
+                                    <!-- Explainable AI (XAI) Panel -->
+                                    <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0d8eef; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                            🧠 Explainable AI Decision Panel
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 5px;">
+                                            <!-- Reason -->
+                                            <div style="border-left: 2px solid var(--primary); padding-left: 12px; text-align: left;">
+                                                <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Triggering Reason</div>
+                                                <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; margin-top: 2px;">
+                                                    ${rec.description.includes('Triggered by') ? rec.description.split('. ')[0] : 'System Baseline Optimization'}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Confidence -->
+                                            <div style="border-left: 2px solid var(--success); padding-left: 12px; text-align: left;">
+                                                <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">MCTS Confidence</div>
+                                                <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 600; margin-top: 2px;">
+                                                    ${rec.confidence}% Search Probability (MCTS Reward: ${(rec.mcts_reward || 0.85).toFixed(2)})
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Expected Impact -->
+                                            <div style="border-left: 2px solid var(--warning); padding-left: 12px; text-align: left;">
+                                                <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Expected Impact</div>
+                                                <div style="font-size: 0.85rem; color: #10b981; font-weight: 600; margin-top: 2px;">
+                                                    ${rec.reasoning}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Alternatives evaluated -->
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 4px; text-align: left;">
+                                            <span style="font-weight: 600; color: var(--text-primary);">MCTS Tree Search Trade-offs:</span> ${rec.alternatives}
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+                                        <button class="btn btn--primary" onclick="applyRecommendation(this, '${rec.title.replace(/'/g, "\\'")}')">Apply Recommendation</button>
+                                        <button class="btn btn--outline" onclick="viewSimulation('${simScenario}')">View Simulation</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-secondary);">No recommendations currently active.</div>';
+                }
+            } else {
+                container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-secondary);">No recommendations currently active.</div>';
+            }
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--danger);">Failed to load recommendations. Please check server.</div>';
+        }
+    }
+
+    // Apply Recommendation
+    async function applyRecommendation(btn, recommendationName) {
+        if (btn.disabled) return;
+        
+        btn.classList.add('btn--loading');
+        btn.disabled = true;
+        
+        const city = (typeof globalState !== 'undefined' && globalState.city) 
+            ? globalState.city 
+            : (localStorage.getItem('selectedCity') || 'Mumbai, India');
+            
+        try {
+            const res = await fetch('/api/apply_recommendation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    recommendation: recommendationName,
+                    city: city
+                })
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                btn.classList.remove('btn--loading');
+                btn.innerHTML = '✓ Applied';
+                btn.className = 'btn btn--accent';
+                btn.disabled = true;
+                
+                // Immediately refresh recommendations page to show cleared/changed status
+                setTimeout(() => {
+                    loadRecommendations(true);
+                    
+                    // Dispatch custom event to notify other components (e.g. notifications dropdown)
+                    if (typeof globalState !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('cityChanged', { detail: globalState }));
+                    }
+                }, 1000);
+            } else {
+                showToast("Failed to apply recommendation: " + data.message, 'danger');
+                btn.classList.remove('btn--loading');
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Network error trying to apply recommendation", 'danger');
+            btn.classList.remove('btn--loading');
+            btn.disabled = false;
+        }
+    }
+
+    // Redirect to simulation page with scenario query param
+    function viewSimulation(scenarioName) {
+        window.location.href = `/simulation?scenario=${encodeURIComponent(scenarioName)}`;
+    }
+
+    // Load recommendations on init, and refresh every 10 seconds to respond to live feed updates
+    document.addEventListener('DOMContentLoaded', () => {
+        loadRecommendations(true);
+        
+        // Listen for global city changes and reload immediately
+        window.addEventListener('cityChanged', (e) => {
+            console.log("[Recommendations] City changed to:", e.detail.city);
+            loadRecommendations(true);
+        });
+
+        // Background polling loop
+        setInterval(() => loadRecommendations(false), 10000);
+    });
+</script>
+{% endblock %}

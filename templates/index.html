@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Overview{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- KPI Strip – Core Metrics -->
+            <div class="kpi-strip">
+                <div class="kpi-card kpi-card--blue fade-in fade-in-delay-1" id="kpi-traffic">
+                    <div class="kpi-card__label">Traffic Flow</div>
+                    <div class="kpi-card__value">12,450</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--up">↑ 3.2%</span></div>
+                </div>
+                <div class="kpi-card kpi-card--amber fade-in fade-in-delay-2" id="kpi-pollution">
+                    <div class="kpi-card__label">Air Quality Index</div>
+                    <div class="kpi-card__value">72</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--down">↓ 5.1%</span></div>
+                </div>
+                <div class="kpi-card kpi-card--emerald fade-in fade-in-delay-3" id="kpi-energy">
+                    <div class="kpi-card__label">Energy Usage (MW)</div>
+                    <div class="kpi-card__value">384.5</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--up">↑ 1.8%</span></div>
+                </div>
+                <div class="kpi-card kpi-card--red fade-in fade-in-delay-4" id="kpi-alerts">
+                    <div class="kpi-card__label">Active Alerts</div>
+                    <div class="kpi-card__value">7</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--down">↓ 2</span></div>
+                </div>
+            </div>
+
+            <!-- KPI Strip – New Smart Domains -->
+            <div class="kpi-strip" style="margin-top: var(--space-4);">
+                <div class="kpi-card kpi-card--cyan fade-in fade-in-delay-1" id="kpi-water">
+                    <div class="kpi-card__label">💧 Water Consumption</div>
+                    <div class="kpi-card__value">25,200 L</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--up">↑ 0.5%</span></div>
+                </div>
+                <div class="kpi-card kpi-card--orange fade-in fade-in-delay-2" id="kpi-waste">
+                    <div class="kpi-card__label">🗑️ Bin Fill Level</div>
+                    <div class="kpi-card__value">45%</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--up">↑ 1.2%</span></div>
+                </div>
+                <div class="kpi-card kpi-card--pink fade-in fade-in-delay-3" id="kpi-healthcare">
+                    <div class="kpi-card__label">🏥 ER Response</div>
+                    <div class="kpi-card__value">12.5 min</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--down">↓ 0.5 min</span></div>
+                </div>
+                <div class="kpi-card kpi-card--violet fade-in fade-in-delay-4" id="kpi-safety">
+                    <div class="kpi-card__label">🛡️ Crime Index</div>
+                    <div class="kpi-card__value">25</div>
+                    <div class="kpi-card__footer"><span class="kpi-card__trend kpi-card__trend--down">↓ 0.2</span></div>
+                </div>
+            </div>
+
+            <!-- Full Width Map -->
+            <div class="card fade-in" style="margin-top: var(--space-6); margin-bottom: var(--space-6); display: flex; flex-direction: column;">
+                <div class="card__header">
+                    <h3 class="card__title">Live Map Overview</h3>
+                </div>
+                <div id="dashboard-mini-map" style="width: 100%; height: 300px; background: #0a0e1a; border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden;"></div>
+            </div>
+
+            <!-- 6-Domain Smart City Monitoring Grid -->
+            <div style="margin-bottom: var(--space-4);">
+                <h3 style="font-size:1.1rem; font-weight:600; color:var(--text-primary); margin-bottom:var(--space-3);">
+                    🌐 Smart City Intelligence Sectors
+                </h3>
+            </div>
+            <div class="grid grid--3" style="gap: var(--space-5); margin-bottom: var(--space-6);">
+
+                <!-- Water Management -->
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header" style="border-left:3px solid #06b6d4;">
+                        <h3 class="chart-panel__title">💧 Smart Water Management</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 130px;">
+                        <canvas id="mini-water-chart"></canvas>
+                    </div>
+                    <div style="padding: var(--space-3); font-size:.78rem; color:var(--text-secondary);">
+                        Real-time consumption, leak detection &amp; reservoir monitoring
+                    </div>
+                </div>
+
+                <!-- Waste Management -->
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header" style="border-left:3px solid #f59e0b;">
+                        <h3 class="chart-panel__title">🗑️ Smart Waste Management</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 130px;">
+                        <canvas id="mini-waste-chart"></canvas>
+                    </div>
+                    <div style="padding: var(--space-3); font-size:.78rem; color:var(--text-secondary);">
+                        Bin fill telemetry, route optimisation &amp; recycling rates
+                    </div>
+                </div>
+
+                <!-- Healthcare -->
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header" style="border-left:3px solid #ec4899;">
+                        <h3 class="chart-panel__title">🏥 Smart Healthcare</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 130px;">
+                        <canvas id="mini-healthcare-chart"></canvas>
+                    </div>
+                    <div style="padding: var(--space-3); font-size:.78rem; color:var(--text-secondary);">
+                        Emergency response times, bed occupancy &amp; health alerts
+                    </div>
+                </div>
+
+                <!-- Public Safety -->
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header" style="border-left:3px solid #8b5cf6;">
+                        <h3 class="chart-panel__title">🛡️ Smart Public Safety</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 130px;">
+                        <canvas id="mini-safety-chart"></canvas>
+                    </div>
+                    <div style="padding: var(--space-3); font-size:.78rem; color:var(--text-secondary);">
+                        Crime index, patrol coverage &amp; UAV surveillance
+                    </div>
+                </div>
+
+                <!-- Environment -->
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header" style="border-left:3px solid #10b981;">
+                        <h3 class="chart-panel__title">🌿 Environment Monitoring</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 130px;">
+                        <canvas id="mini-environment-chart"></canvas>
+                    </div>
+                    <div style="padding: var(--space-3); font-size:.78rem; color:var(--text-secondary);">
+                        CO₂ levels, noise pollution, temperature &amp; green coverage
+                    </div>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="card fade-in">
+                    <div class="card__header">
+                        <h3 class="card__title">⚡ Recent Activity</h3>
+                    </div>
+                    <ul class="activity-feed">
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot activity-feed__dot--warning"></span>
+                            <div>
+                                <div class="activity-feed__text">High congestion detected on Route R003</div>
+                                <div class="activity-feed__time">2 minutes ago</div>
+                            </div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot activity-feed__dot--danger"></span>
+                            <div>
+                                <div class="activity-feed__text">AQI exceeded threshold in Zone C</div>
+                                <div class="activity-feed__time">28 minutes ago</div>
+                            </div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#06b6d4;"></span>
+                            <div>
+                                <div class="activity-feed__text">Water leak detected — repair team dispatched</div>
+                                <div class="activity-feed__time">42 minutes ago</div>
+                            </div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#ec4899;"></span>
+                            <div>
+                                <div class="activity-feed__text">ER bed occupancy at 87% — mobile units activated</div>
+                                <div class="activity-feed__time">1 hour ago</div>
+                            </div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot activity-feed__dot--info"></span>
+                            <div>
+                                <div class="activity-feed__text">World model re-trained on 6-domain dataset</div>
+                                <div class="activity-feed__time">2 hours ago</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Traffic Chart Row -->
+            <div class="grid grid--2" style="gap: var(--space-6); margin-bottom: var(--space-6);">
+                <div class="chart-panel fade-in">
+                    <div class="chart-panel__header">
+                        <h3 class="chart-panel__title">🚗 Traffic Flow — Last 24 Hours</h3>
+                    </div>
+                    <div class="chart-panel__body" style="height: 250px;">
+                        <canvas id="traffic-chart" class="chart-panel__canvas"></canvas>
+                    </div>
+                </div>
+                <div class="card fade-in">
+                    <div class="card__header">
+                        <h3 class="card__title">🧠 CityVerse AI Status</h3>
+                    </div>
+                    <ul class="activity-feed" style="padding: var(--space-3);">
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#10b981;"></span>
+                            <div><div class="activity-feed__text">RSSM World Model — <strong>Active</strong></div></div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#10b981;"></span>
+                            <div><div class="activity-feed__text">MCTS Planner (32 actions) — <strong>Ready</strong></div></div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#4F46E5;"></span>
+                            <div><div class="activity-feed__text">6-Domain Data Streams — <strong>Online</strong></div></div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#f59e0b;"></span>
+                            <div><div class="activity-feed__text">YOLO Detection — <strong>Standby</strong></div></div>
+                        </li>
+                        <li class="activity-feed__item">
+                            <span class="activity-feed__dot" style="background:#10b981;"></span>
+                            <div><div class="activity-feed__text">Digital Twin Engine — <strong>Synced</strong></div></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=2"></script>
+<script>
+    // Initialize mini Google Map for Dashboard
+    function initDashboardMap() {
+        const mapContainer = document.getElementById('dashboard-mini-map');
+        if (!mapContainer || typeof google === 'undefined') return;
+
+        // Same dark map style
+        const darkMapStyle = [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] }
+        ];
+
+        const map = new google.maps.Map(mapContainer, {
+            center: { lat: 19.0760, lng: 72.8777 },
+            zoom: 11,
+            styles: darkMapStyle,
+            disableDefaultUI: true
+        });
+
+        const trafficLayer = new google.maps.TrafficLayer();
+        trafficLayer.setMap(map);
+        
+        // Listen to Global City Change
+        window.addEventListener('cityChanged', (e) => {
+            const data = e.detail;
+            if (data.bounds) {
+                map.fitBounds(data.bounds);
+            } else {
+                map.panTo({ lat: data.lat, lng: data.lng });
+                map.setZoom(12);
+            }
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initDashboardMap, 500));
+    } else {
+        setTimeout(initDashboardMap, 500);
+    }
+</script>
+{% endblock %}
