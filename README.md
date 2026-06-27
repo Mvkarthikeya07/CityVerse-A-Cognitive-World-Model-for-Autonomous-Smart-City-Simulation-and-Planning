@@ -1,6 +1,6 @@
 <div align="center">
 
-# CityVerse — A Cognitive World Model for Autonomous Smart City Simulation & Plannin
+# CityVerse — A Cognitive World Model for Autonomous Smart City Simulation & Planning
 
 **The first open-source cognitive digital twin that doesn't just monitor cities — it thinks about them.**
 
