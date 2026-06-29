@@ -57,9 +57,13 @@ function renderMiniChart(canvasId, labels, data, color = '#4F46E5', label = '') 
     const ctx = document.getElementById(canvasId);
     if (!ctx || typeof Chart === 'undefined') return null;
 
-    // Destroy if already exists
     const existing = Chart.getChart(canvasId);
-    if (existing) existing.destroy();
+    if (existing) {
+        existing.data.labels = labels;
+        existing.data.datasets[0].data = data;
+        existing.update();
+        return existing;
+    }
 
     return new Chart(ctx, {
         type: 'line',
@@ -137,10 +141,14 @@ async function fetchDashboardData() {
         // ── Traffic Chart ─────────────────────────────────────────────
         const trafficCtx = document.getElementById('traffic-chart');
         if (trafficCtx && traffic && traffic.datasets) {
-            dashboardState.trafficChart = CityCharts.createAreaChart(
-                'traffic-chart', traffic.labels, traffic.datasets,
-                { scales: CityCharts.getCommonScales() }
-            );
+            if (dashboardState.trafficChart) {
+                CityCharts.updateChartData(dashboardState.trafficChart, traffic.labels, traffic.datasets.map(d => d.data));
+            } else {
+                dashboardState.trafficChart = CityCharts.createAreaChart(
+                    'traffic-chart', traffic.labels, traffic.datasets,
+                    { scales: CityCharts.getCommonScales() }
+                );
+            }
         }
 
         // ── Mini Charts — 6 Smart Domains ─────────────────────────────
