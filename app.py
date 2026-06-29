@@ -696,6 +696,8 @@ def api_traffic():
             
     labels = [(datetime.now() - timedelta(hours=i)).strftime('%H:00') for i in range(hours, 0, -1)]
     data = get_real_traffic_profile(zone, hours, base_volume)
+    # Add slight random jitter for live feed simulation
+    data = [int(v * (1.0 + np.random.uniform(-0.02, 0.02))) for v in data]
     return jsonify({"labels": labels, "datasets": [{"label": "Traffic Volume", "data": data}]})
 
 @app.route('/api/pollution', methods=['GET'])
@@ -711,6 +713,8 @@ def api_pollution():
 
     labels = [(datetime.now() - timedelta(hours=i)).strftime('%H:00') for i in range(hours, 0, -1)]
     data = get_real_pollution_profile(zone, hours, base_aqi)
+    # Add slight random jitter for live feed simulation
+    data = [int(v * (1.0 + np.random.uniform(-0.02, 0.02))) for v in data]
     return jsonify({"labels": labels, "datasets": [{"label": "AQI", "data": data}]})
 
 @app.route('/api/energy', methods=['GET'])
@@ -724,6 +728,8 @@ def api_energy():
 
     # Split consumption dynamically into zones based on real dataset ratios
     split = get_real_energy_zones_split(base_energy)
+    # Add slight random jitter for live feed simulation
+    split = [round(v * (1.0 + np.random.uniform(-0.02, 0.02)), 1) for v in split]
     return jsonify({
         "labels": ["Zone A", "Zone B", "Zone C", "Industrial"], 
         "data": split
