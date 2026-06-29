@@ -211,6 +211,17 @@ window.addEventListener('cityChanged', (e) => {
     fetchDashboardData();
 });
 
+window.addEventListener('storage', (e) => {
+    if (e.key === 'setting-refresh') {
+        const newInterval = parseInt(e.newValue) * 1000;
+        if (newInterval && newInterval !== dashboardState.refreshInterval) {
+            dashboardState.refreshInterval = newInterval;
+            console.log(`[Dashboard] Auto-refresh interval updated to ${e.newValue}s`);
+            startAutoRefresh();
+        }
+    }
+});
+
 // ── Init ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {

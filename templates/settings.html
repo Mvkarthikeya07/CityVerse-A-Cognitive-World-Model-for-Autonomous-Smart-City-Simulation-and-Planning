@@ -11,16 +11,29 @@
         </div>
         <div class="card__body" style="display:flex; flex-direction:column; gap: var(--space-4);">
             <div>
-                <label class="form-label" for="setting-latent">Latent Dimension</label>
-                <input type="number" class="form-input" id="setting-latent" value="64" style="max-width: 320px; font-family:var(--font-mono);">
+                <label class="form-label" for="setting-latent">Latent Dimension Size</label>
+                <select class="form-select" id="setting-latent" style="max-width: 320px;" onchange="saveSettings()">
+                    <option value="32">32 (Fast)</option>
+                    <option value="64" selected>64 (Balanced)</option>
+                    <option value="128">128 (Accurate)</option>
+                    <option value="256">256 (High Precision)</option>
+                </select>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Higher dimensions capture more city states but use more VRAM.</div>
             </div>
+            
             <div>
-                <label class="form-label" for="setting-action">Action Dimension</label>
-                <input type="number" class="form-input" id="setting-action" value="16" style="max-width: 320px; font-family:var(--font-mono);">
+                <label class="form-label" for="setting-action">Action Space Limit</label>
+                <select class="form-select" id="setting-action" style="max-width: 320px;" onchange="saveSettings()">
+                    <option value="8">8 concurrent actions</option>
+                    <option value="16" selected>16 concurrent actions</option>
+                    <option value="32">32 concurrent actions</option>
+                </select>
             </div>
+
             <div>
-                <label class="form-label" for="setting-horizon">Planning Horizon</label>
-                <input type="number" class="form-input" id="setting-horizon" value="10" style="max-width: 320px; font-family:var(--font-mono);">
+                <label class="form-label" for="setting-horizon">Planning Horizon (Steps)</label>
+                <input type="number" class="form-input" id="setting-horizon" value="10" style="max-width: 320px; font-family:var(--font-mono);" onchange="saveSettings()">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Number of future states the MCTS algorithm will simulate.</div>
             </div>
         </div>
     </div>
@@ -54,7 +67,7 @@
         <div class="card__body" style="display:flex; flex-direction:column; gap: var(--space-4);">
             <div>
                 <label class="form-label" for="setting-refresh">Dashboard Refresh Rate</label>
-                <select class="form-select" id="setting-refresh" style="max-width: 320px;">
+                <select class="form-select" id="setting-refresh" style="max-width: 320px;" onchange="saveSettings()">
                     <option value="10">10 seconds</option>
                     <option value="30" selected>30 seconds</option>
                     <option value="60">1 minute</option>
