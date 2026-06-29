@@ -192,9 +192,33 @@ async function fetchDashboardData() {
 
 // ── Auto Refresh ──────────────────────────────────────────────────────────
 
+function updateProgressBar() {
+    const progressBar = document.getElementById('dashboard-refresh-progress');
+    if (!progressBar) return;
+    
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '0%';
+    
+    // Force a reflow to restart animation
+    void progressBar.offsetWidth;
+    
+    progressBar.style.transition = `width ${dashboardState.refreshInterval}ms linear`;
+    progressBar.style.width = '100%';
+}
+
 function startAutoRefresh() {
     stopAutoRefresh();
-    dashboardState.timer = setInterval(fetchDashboardData, dashboardState.refreshInterval);
+    
+    // Start interval
+    dashboardState.timer = setInterval(() => {
+        fetchDashboardData();
+        updateProgressBar();
+    }, dashboardState.refreshInterval);
+    
+    // Initialize UI
+    const progressBar = document.getElementById('dashboard-refresh-progress');
+    if (progressBar) progressBar.style.display = 'block';
+    updateProgressBar();
 }
 
 function stopAutoRefresh() {
@@ -202,6 +226,8 @@ function stopAutoRefresh() {
         clearInterval(dashboardState.timer);
         dashboardState.timer = null;
     }
+    const progressBar = document.getElementById('dashboard-refresh-progress');
+    if (progressBar) progressBar.style.display = 'none';
 }
 
 // ── Global Event Sync ─────────────────────────────────────────────────────
